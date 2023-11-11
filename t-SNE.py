@@ -1,7 +1,6 @@
 import numpy as np
 from functools  import reduce
 import illustrator as ill
-import eigen_module as em
 import binary_search as bs
 import matplotlib.pyplot as plt
 
