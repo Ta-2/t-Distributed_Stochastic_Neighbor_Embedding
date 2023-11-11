@@ -7,17 +7,21 @@ import matplotlib.pyplot as plt
 #データの取得
 X = np.loadtxt('data.csv')
 row = 5
-col = 5
+col = X.shape[0]
 
 #取得データの確認
 print("inputed data:")
 print(X)
 
+learning_rate = 0.005
+momentum = 0.01
+optimaize_loop = 2000
 Perplexity = 1.3
+threshold = 0.00001
 log_perp = np.log2(Perplexity)
 print("log_perp: " + str(log_perp))
 
-sigma = 500.0
+#sigma = 500.0
 compressed_data = np.random.rand(row, 2)
 
 def d_pow2(vec1, vec2):
@@ -75,14 +79,14 @@ def KLdivergence(X, Y, sigmas):
 
         return sum(amount_info)
 
-sigma = bs.binary_search(Entropy, (X, 0), log_perp, 1.0e-7, [1.0001, 100000.0], 100)
+#sigma = bs.binary_search(Entropy, (X, 0), log_perp, 1.0e-7, [1.0001, 100000.0], 100)
 sigmas = [
     bs.binary_search(Entropy, (X, i), log_perp, 1.0e-7, [1.0001, 100000.0], 100)
     for i in range(row)
     ]
 print("sigmas: " + str(sigmas))
 
-entropy = [Entropy(sigmas[i],X,i) for i in range(row)]
+#entropy = [Entropy(sigmas[i],X,i) for i in range(row)]
 #print("whole entropy: ")
 #print(entropy)
 
@@ -99,18 +103,30 @@ def grad(X, Y, i, sigmas):
     pq = (p_ji - q_ji + p_ij - q_ij).reshape(1, row-1)
     return 2*np.dot(pq, y_i)[0]
 
-KL = []
-for i in range(1000):
-    gradient = np.array([grad(X, compressed_data, i, sigmas) for i in range(row)])
-    compressed_data -= 0.01 * gradient
-    #print("KLdivergence: ")
-    KL.append(KLdivergence(X, compressed_data, sigmas))
+def optimize():
+    KL = []
+    Y_1 = np.zeros([row, 2])
+    Y_2 = np.zeros([row, 2])
+    cost = KLdivergence(X, compressed_data, sigmas)
+    for i in range(optimaize_loop):
+        gradient = np.array([grad(X, compressed_data, i, sigmas) for i in range(row)])
+        compressed_data -= learning_rate * gradient
+        compressed_data += momentum * (Y_1 - Y_2)
 
+        new_cost = KLdivergence(X, compressed_data, sigmas)
+        KL.append(new_cost)
+        if(abs(new_cost - cost) < threshold):
+            break
+
+        Y_2 = Y_1
+        Y_1 = gradient
+        cost = new_cost
+    return compressed_data
 
 print("KLdivergence: ")
 print(KLdivergence(X, compressed_data, sigmas))
 
-
+#fig = plt.figure(figsize=(5,5))
 plt.plot(KL)
 plt.show()
 
