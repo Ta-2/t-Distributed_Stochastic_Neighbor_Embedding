@@ -45,8 +45,11 @@ def line_chart(datas):
 def show():
     plt.show()
 
+def cla():
+    plt.cla()
+
 #アニメーションを保存
 def seve_animation(frames, filename):
     ani = ArtistAnimation(plt.gcf(), frames, interval=10)
     ani.save(filename + ".gif", writer='pillow')
-    plt.cla()
+    plt.show()
