@@ -1,8 +1,13 @@
 import matplotlib.pyplot as plt
+from matplotlib.animation import ArtistAnimation
 import numpy as np
 
+#データ描画関数
 def illustrate(datas, margin=30):
+    #データ数の取得
     data_num = datas.shape[0]
+    #プロットデータのリスト
+    artists = []
 
     #各データのクラスを設定
     classes = [chr(i) for i in range(ord('A'), ord('A')+data_num)]
@@ -18,12 +23,33 @@ def illustrate(datas, margin=30):
     ymax, ymin = max([d[1] for d in datas]), min([d[1] for d in datas])
     
     #点群のプロット
-    plt.scatter(x=[d[0] for d in datas], y=[d[1] for d in datas], s=200, c=color)
+    sct = plt.scatter(x=[d[0] for d in datas], y=[d[1] for d in datas], s=200, c=color)
+    artists.append(sct)
     for d, cls in zip(datas, classes):
-        plt.text(x=d[0], y=d[1], s=cls, fontsize=18)
+        tex = plt.text(x=d[0], y=d[1], s=cls, fontsize=18)
+        artists.append(tex)
 
     #その他の表示
     plt.xlim([xmin-margin, xmax+margin])
     plt.ylim([ymin-margin, ymax+margin])
     plt.grid()
+
+    #プロットデータのartistリストを返す
+    return artists
+
+#折れ線グラフを描画
+def line_chart(datas):
+    plt.plot(datas)
+
+#グラフの表示
+def show():
+    plt.show()
+
+def cla():
+    plt.cla()
+
+#アニメーションを保存
+def seve_animation(frames, filename):
+    ani = ArtistAnimation(plt.gcf(), frames, interval=10)
+    ani.save(filename + ".gif", writer='pillow')
     plt.show()
